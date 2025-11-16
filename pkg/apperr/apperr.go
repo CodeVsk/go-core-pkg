@@ -17,7 +17,8 @@ func NewNotFound(message string) *AppErr {
 
 func NewErrBadRequest(message string) *AppErr {
 	return &AppErr{
-		Kind: ErrBadRequest,
+		Kind:    ErrBadRequest,
+		Message: message,
 	}
 }
 

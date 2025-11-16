@@ -102,11 +102,9 @@ func TestNewErrInternal(t *testing.T) {
 
 func TestGetError(t *testing.T) {
 	tests := []struct {
-		name      string
-		input     error
-		want      *AppErr
-		wantNil   bool
-		checkCode bool
+		name  string
+		input error
+		want  *AppErr
 	}{
 		{
 			name: "extracts AppErr successfully",
@@ -118,18 +116,22 @@ func TestGetError(t *testing.T) {
 				Kind:    ErrNotFound,
 				Message: "not found",
 			},
-			wantNil:   false,
-			checkCode: true,
 		},
 		{
-			name:    "returns nil for non-AppErr error",
-			input:   errors.New("regular error"),
-			wantNil: true,
+			name:  "returns internal error for non-AppErr error",
+			input: errors.New("regular error"),
+			want: &AppErr{
+				Kind:    ErrInternal,
+				Message: ErrInternal.Error(),
+			},
 		},
 		{
-			name:    "returns nil for nil error",
-			input:   nil,
-			wantNil: true,
+			name:  "returns internal error for nil error",
+			input: nil,
+			want: &AppErr{
+				Kind:    ErrInternal,
+				Message: ErrInternal.Error(),
+			},
 		},
 		{
 			name: "extracts AppErr with details",
@@ -143,19 +145,12 @@ func TestGetError(t *testing.T) {
 				Message: "internal error",
 				Details: errors.New("underlying error"),
 			},
-			wantNil:   false,
-			checkCode: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := GetError(tt.input)
-
-			if tt.wantNil {
-				assert.Nil(t, got)
-				return
-			}
 
 			require.NotNil(t, got, "GetError() should not return nil")
 			assert.Equal(t, tt.want.Kind, got.Kind)
@@ -164,6 +159,13 @@ func TestGetError(t *testing.T) {
 			if tt.want.Details != nil {
 				require.NotNil(t, got.Details)
 				assert.Equal(t, tt.want.Details.Error(), got.Details.Error())
+			} else {
+				// For non-AppErr errors (or nil input), check that Details contains the expected message
+				var appErr *AppErr
+				if tt.input == nil || !errors.As(tt.input, &appErr) {
+					require.NotNil(t, got.Details)
+					assert.Contains(t, got.Details.Error(), "not compatible with AppErr")
+				}
 			}
 		})
 	}
