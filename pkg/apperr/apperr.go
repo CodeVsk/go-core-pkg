@@ -57,12 +57,25 @@ func GetError(appError error) *AppErr {
 	var err *AppErr
 
 	if errors.As(appError, &err) {
-		err.HttpCode = httpCode(err.Kind)
-
 		return err
 	}
 
 	return nil
+}
+
+func GetApiError(appError error) (*ApiErr, int) {
+	err := GetError(appError)
+	if err != nil {
+		return &ApiErr{
+			Code:    err.Kind.Error(),
+			Message: err.Message,
+		}, httpCode(err.Kind)
+	}
+
+	return &ApiErr{
+		Code:    ErrInternal.Error(),
+		Message: ErrInternal.Error(),
+	}, http.StatusInternalServerError
 }
 
 func httpCode(err error) int {

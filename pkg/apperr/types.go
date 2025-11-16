@@ -12,8 +12,12 @@ var (
 )
 
 type AppErr struct {
-	Kind     error
-	Message  string
-	Details  error
-	HttpCode int
+	Kind    error
+	Message string
+	Details error
+}
+
+type ApiErr struct {
+	Code    string
+	Message string
 }

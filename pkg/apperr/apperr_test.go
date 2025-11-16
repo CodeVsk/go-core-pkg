@@ -4,6 +4,9 @@ import (
 	"errors"
 	"net/http"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAppErr_Error(t *testing.T) {
@@ -30,9 +33,8 @@ func TestAppErr_Error(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.appErr.Error(); got != tt.want {
-				t.Errorf("AppErr.Error() = %v, want %v", got, tt.want)
-			}
+			got := tt.appErr.Error()
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -41,31 +43,17 @@ func TestNewNotFound(t *testing.T) {
 	message := "resource not found"
 	err := NewNotFound(message)
 
-	if err == nil {
-		t.Fatal("NewNotFound() returned nil")
-	}
-
-	if err.Kind != ErrNotFound {
-		t.Errorf("NewNotFound().Kind = %v, want %v", err.Kind, ErrNotFound)
-	}
-
-	if err.Message != message {
-		t.Errorf("NewNotFound().Message = %v, want %v", err.Message, message)
-	}
+	require.NotNil(t, err, "NewNotFound() should not return nil")
+	assert.Equal(t, ErrNotFound, err.Kind)
+	assert.Equal(t, message, err.Message)
 }
 
 func TestNewErrBadRequest(t *testing.T) {
 	message := "invalid input"
 	err := NewErrBadRequest(message)
 
-	if err == nil {
-		t.Fatal("NewErrBadRequest() returned nil")
-	}
-
-	if err.Kind != ErrBadRequest {
-		t.Errorf("NewErrBadRequest().Kind = %v, want %v", err.Kind, ErrBadRequest)
-	}
-
+	require.NotNil(t, err, "NewErrBadRequest() should not return nil")
+	assert.Equal(t, ErrBadRequest, err.Kind)
 	// Note: Current implementation doesn't set Message, even though it accepts a parameter
 	// This test reflects the current behavior
 }
@@ -74,17 +62,9 @@ func TestNewErrConflict(t *testing.T) {
 	message := "resource conflict"
 	err := NewErrConflict(message)
 
-	if err == nil {
-		t.Fatal("NewErrConflict() returned nil")
-	}
-
-	if err.Kind != ErrConflict {
-		t.Errorf("NewErrConflict().Kind = %v, want %v", err.Kind, ErrConflict)
-	}
-
-	if err.Message != message {
-		t.Errorf("NewErrConflict().Message = %v, want %v", err.Message, message)
-	}
+	require.NotNil(t, err, "NewErrConflict() should not return nil")
+	assert.Equal(t, ErrConflict, err.Kind)
+	assert.Equal(t, message, err.Message)
 }
 
 func TestNewErrUnauthorized(t *testing.T) {
@@ -92,21 +72,10 @@ func TestNewErrUnauthorized(t *testing.T) {
 	details := errors.New("token expired")
 	err := NewErrUnauthorized(message, details)
 
-	if err == nil {
-		t.Fatal("NewErrUnauthorized() returned nil")
-	}
-
-	if err.Kind != ErrUnauthorized {
-		t.Errorf("NewErrUnauthorized().Kind = %v, want %v", err.Kind, ErrUnauthorized)
-	}
-
-	if err.Message != message {
-		t.Errorf("NewErrUnauthorized().Message = %v, want %v", err.Message, message)
-	}
-
-	if err.Details != details {
-		t.Errorf("NewErrUnauthorized().Details = %v, want %v", err.Details, details)
-	}
+	require.NotNil(t, err, "NewErrUnauthorized() should not return nil")
+	assert.Equal(t, ErrUnauthorized, err.Kind)
+	assert.Equal(t, message, err.Message)
+	assert.Equal(t, details, err.Details)
 }
 
 func TestNewErrForbidden(t *testing.T) {
@@ -114,21 +83,10 @@ func TestNewErrForbidden(t *testing.T) {
 	details := errors.New("insufficient permissions")
 	err := NewErrForbidden(message, details)
 
-	if err == nil {
-		t.Fatal("NewErrForbidden() returned nil")
-	}
-
-	if err.Kind != ErrForbidden {
-		t.Errorf("NewErrForbidden().Kind = %v, want %v", err.Kind, ErrForbidden)
-	}
-
-	if err.Message != message {
-		t.Errorf("NewErrForbidden().Message = %v, want %v", err.Message, message)
-	}
-
-	if err.Details != details {
-		t.Errorf("NewErrForbidden().Details = %v, want %v", err.Details, details)
-	}
+	require.NotNil(t, err, "NewErrForbidden() should not return nil")
+	assert.Equal(t, ErrForbidden, err.Kind)
+	assert.Equal(t, message, err.Message)
+	assert.Equal(t, details, err.Details)
 }
 
 func TestNewErrInternal(t *testing.T) {
@@ -136,21 +94,10 @@ func TestNewErrInternal(t *testing.T) {
 	details := errors.New("database connection failed")
 	err := NewErrInternal(message, details)
 
-	if err == nil {
-		t.Fatal("NewErrInternal() returned nil")
-	}
-
-	if err.Kind != ErrInternal {
-		t.Errorf("NewErrInternal().Kind = %v, want %v", err.Kind, ErrInternal)
-	}
-
-	if err.Message != message {
-		t.Errorf("NewErrInternal().Message = %v, want %v", err.Message, message)
-	}
-
-	if err.Details != details {
-		t.Errorf("NewErrInternal().Details = %v, want %v", err.Details, details)
-	}
+	require.NotNil(t, err, "NewErrInternal() should not return nil")
+	assert.Equal(t, ErrInternal, err.Kind)
+	assert.Equal(t, message, err.Message)
+	assert.Equal(t, details, err.Details)
 }
 
 func TestGetError(t *testing.T) {
@@ -206,33 +153,17 @@ func TestGetError(t *testing.T) {
 			got := GetError(tt.input)
 
 			if tt.wantNil {
-				if got != nil {
-					t.Errorf("GetError() = %v, want nil", got)
-				}
+				assert.Nil(t, got)
 				return
 			}
 
-			if got == nil {
-				t.Fatal("GetError() returned nil, want AppErr")
-			}
+			require.NotNil(t, got, "GetError() should not return nil")
+			assert.Equal(t, tt.want.Kind, got.Kind)
+			assert.Equal(t, tt.want.Message, got.Message)
 
-			if got.Kind != tt.want.Kind {
-				t.Errorf("GetError().Kind = %v, want %v", got.Kind, tt.want.Kind)
-			}
-
-			if got.Message != tt.want.Message {
-				t.Errorf("GetError().Message = %v, want %v", got.Message, tt.want.Message)
-			}
-
-			if tt.checkCode {
-				expectedCode := httpCode(tt.want.Kind)
-				if got.HttpCode != expectedCode {
-					t.Errorf("GetError().HttpCode = %v, want %v", got.HttpCode, expectedCode)
-				}
-			}
-
-			if tt.want.Details != nil && got.Details.Error() != tt.want.Details.Error() {
-				t.Errorf("GetError().Details = %v, want %v", got.Details, tt.want.Details)
+			if tt.want.Details != nil {
+				require.NotNil(t, got.Details)
+				assert.Equal(t, tt.want.Details.Error(), got.Details.Error())
 			}
 		})
 	}
@@ -288,9 +219,8 @@ func TestHttpCode(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := httpCode(tt.err); got != tt.want {
-				t.Errorf("httpCode() = %v, want %v", got, tt.want)
-			}
+			got := httpCode(tt.err)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -354,12 +284,113 @@ func TestGetErrorWithHttpCode(t *testing.T) {
 	for _, tt := range errorTypes {
 		t.Run(tt.name, func(t *testing.T) {
 			got := GetError(tt.err)
-			if got == nil {
-				t.Fatal("GetError() returned nil")
-			}
-			if got.HttpCode != tt.wantCode {
-				t.Errorf("GetError().HttpCode = %v, want %v", got.HttpCode, tt.wantCode)
-			}
+			require.NotNil(t, got, "GetError() should not return nil")
+		})
+	}
+}
+
+func TestGetApiError(t *testing.T) {
+	tests := []struct {
+		name         string
+		input        error
+		wantCode     string
+		wantMessage  string
+		wantHttpCode int
+	}{
+		{
+			name: "NotFound returns correct ApiErr",
+			input: &AppErr{
+				Kind:    ErrNotFound,
+				Message: "resource not found",
+			},
+			wantCode:     ErrNotFound.Error(),
+			wantMessage:  "resource not found",
+			wantHttpCode: http.StatusNotFound,
+		},
+		{
+			name: "BadRequest returns correct ApiErr",
+			input: &AppErr{
+				Kind:    ErrBadRequest,
+				Message: "invalid input",
+			},
+			wantCode:     ErrBadRequest.Error(),
+			wantMessage:  "invalid input",
+			wantHttpCode: http.StatusBadRequest,
+		},
+		{
+			name: "Conflict returns correct ApiErr",
+			input: &AppErr{
+				Kind:    ErrConflict,
+				Message: "resource conflict",
+			},
+			wantCode:     ErrConflict.Error(),
+			wantMessage:  "resource conflict",
+			wantHttpCode: http.StatusConflict,
+		},
+		{
+			name: "Unauthorized returns correct ApiErr",
+			input: &AppErr{
+				Kind:    ErrUnauthorized,
+				Message: "unauthorized access",
+			},
+			wantCode:     ErrUnauthorized.Error(),
+			wantMessage:  "unauthorized access",
+			wantHttpCode: http.StatusUnauthorized,
+		},
+		{
+			name: "Forbidden returns correct ApiErr",
+			input: &AppErr{
+				Kind:    ErrForbidden,
+				Message: "forbidden access",
+			},
+			wantCode:     ErrForbidden.Error(),
+			wantMessage:  "forbidden access",
+			wantHttpCode: http.StatusForbidden,
+		},
+		{
+			name: "Internal returns correct ApiErr",
+			input: &AppErr{
+				Kind:    ErrInternal,
+				Message: "internal server error",
+			},
+			wantCode:     ErrInternal.Error(),
+			wantMessage:  "internal server error",
+			wantHttpCode: http.StatusInternalServerError,
+		},
+		{
+			name: "AppErr with empty message returns correct ApiErr",
+			input: &AppErr{
+				Kind:    ErrNotFound,
+				Message: "",
+			},
+			wantCode:     ErrNotFound.Error(),
+			wantMessage:  "",
+			wantHttpCode: http.StatusNotFound,
+		},
+		{
+			name:         "non-AppErr error returns default internal error",
+			input:        errors.New("regular error"),
+			wantCode:     ErrInternal.Error(),
+			wantMessage:  ErrInternal.Error(),
+			wantHttpCode: http.StatusInternalServerError,
+		},
+		{
+			name:         "nil error returns default internal error",
+			input:        nil,
+			wantCode:     ErrInternal.Error(),
+			wantMessage:  ErrInternal.Error(),
+			wantHttpCode: http.StatusInternalServerError,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotApiErr, gotHttpCode := GetApiError(tt.input)
+
+			require.NotNil(t, gotApiErr, "GetApiError() should not return nil ApiErr")
+			assert.Equal(t, tt.wantCode, gotApiErr.Code)
+			assert.Equal(t, tt.wantMessage, gotApiErr.Message)
+			assert.Equal(t, tt.wantHttpCode, gotHttpCode)
 		})
 	}
 }
