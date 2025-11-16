@@ -80,6 +80,10 @@ func GetApiError(appError error) *ApiErr {
 	}
 }
 
+func (err *ApiErr) StatusCode() int {
+	return err.statusCode
+}
+
 func httpCode(err error) int {
 	switch err {
 	case ErrNotFound:
