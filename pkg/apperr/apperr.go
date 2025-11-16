@@ -63,19 +63,21 @@ func GetError(appError error) *AppErr {
 	return nil
 }
 
-func GetApiError(appError error) (*ApiErr, int) {
+func GetApiError(appError error) *ApiErr {
 	err := GetError(appError)
 	if err != nil {
 		return &ApiErr{
-			Code:    err.Kind.Error(),
-			Message: err.Message,
-		}, httpCode(err.Kind)
+			Code:       err.Kind.Error(),
+			Message:    err.Message,
+			statusCode: httpCode(err.Kind),
+		}
 	}
 
 	return &ApiErr{
-		Code:    ErrInternal.Error(),
-		Message: ErrInternal.Error(),
-	}, http.StatusInternalServerError
+		Code:       ErrInternal.Error(),
+		Message:    ErrInternal.Error(),
+		statusCode: httpCode(ErrInternal),
+	}
 }
 
 func httpCode(err error) int {

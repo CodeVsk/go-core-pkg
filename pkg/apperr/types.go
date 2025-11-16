@@ -18,6 +18,7 @@ type AppErr struct {
 }
 
 type ApiErr struct {
-	Code    string
-	Message string
+	Code       string
+	Message    string
+	statusCode int
 }

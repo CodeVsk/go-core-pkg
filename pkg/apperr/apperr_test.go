@@ -385,12 +385,11 @@ func TestGetApiError(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotApiErr, gotHttpCode := GetApiError(tt.input)
+			gotApiErr := GetApiError(tt.input)
 
 			require.NotNil(t, gotApiErr, "GetApiError() should not return nil ApiErr")
 			assert.Equal(t, tt.wantCode, gotApiErr.Code)
 			assert.Equal(t, tt.wantMessage, gotApiErr.Message)
-			assert.Equal(t, tt.wantHttpCode, gotHttpCode)
 		})
 	}
 }
